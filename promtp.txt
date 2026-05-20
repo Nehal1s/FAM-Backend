@@ -1,0 +1,55 @@
+I'm building a REST API that will:
+- Run on AWS EC2 
+- Handle 1000 req/min during peak
+- Connect to RDS PostgreSQL (connection pool limit: 20)
+- Need to respond within 200ms p95
+- Deploy via GitHub Actions to prod
+
+Security requirements:
+- API key authentication
+- Input validation on all endpoints
+- SQL injection prevention
+- Rate limiting per API key
+
+Build with:
+- Python 3.11
+- FastAPI
+- SQLAlchemy
+- Pydantic for validation
+
+Production patterns required:
+- Connection pooling (Lambda freeze/thaw aware)
+- Structured logging with correlation IDs
+- CloudWatch metrics for latency and errors
+- Retry logic for database deadlocks
+- Idempotent operations
+
+Create a user fetch endpoint following our patterns.
+
+Database: RDS PostgreSQL (20 connection pool limit)
+Requirements:
+- Use our db.query() wrapper (handles pooling + retries)
+- Input validation with Pydantic
+- Structured logging with correlation_id
+- Return 404 if user not found
+- 200ms timeout on query
+- CloudWatch metrics
+
+Before implementing anything, tell me:
+1. What you understand this feature needs to do
+2. What the key challenges are
+3. What assumptions you're making about the deployment environment
+4. What edge cases you're planning to handle
+
+IMPORTANT: If I suggest something that:
+- Has security implications (like plaintext passwords)
+- Won't scale (like N+1 queries)
+- Violates best practices (like SQL injection risks)
+- Will cause production issues (like unbounded memory usage)
+
+DO NOT blindly implement it. Instead:
+1. Explain why it's problematic
+2. Suggest a better approach
+3. Wait for my confirmation
+
+Be strict. Don't sugarcoat. I'd rather you call out bad ideas than implement them.
