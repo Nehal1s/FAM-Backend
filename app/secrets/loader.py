@@ -96,17 +96,16 @@ class SecretsStore:
             return settings.database_url
 
         payload = self._load_payload()
-        db = payload.get("database")
-        if not db:
+        if not payload.get("username"):
             raise RuntimeError(
                 "No database config: set DATABASE_URL or provide 'database' in Secrets Manager JSON"
             )
 
-        user = quote_plus(str(db["username"]))
-        password = quote_plus(str(db["password"]))
-        host = db["host"]
-        port = db.get("port", 5432)
-        name = db["dbname"]
+        user = quote_plus(str(payload["username"]))
+        password = quote_plus(str(payload["password"]))
+        host = payload["host"]
+        port = payload.get("port", 5432)
+        name = payload["dbname"]
         return f"postgresql+asyncpg://{user}:{password}@{host}:{port}/{name}"
 
     def get_bearer_tokens(self) -> list[BearerTokenEntry]:
