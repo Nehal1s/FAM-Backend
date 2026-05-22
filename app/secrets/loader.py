@@ -74,7 +74,10 @@ class SecretsStore:
 
         if settings.database_secret_arn:
             db_payload = self._fetch_from_aws(settings.database_secret_arn)
-            payload["database"] = db_payload if isinstance(db_payload, dict) and "host" in db_payload else db_payload.get("database", db_payload)
+            if isinstance(db_payload, dict) and "host" in db_payload:
+                payload.update(db_payload)
+            elif isinstance(db_payload, dict) and "database" in db_payload:
+                payload.update(db_payload["database"])
 
         if settings.auth_secret_arn:
             auth_payload = self._fetch_from_aws(settings.auth_secret_arn)
