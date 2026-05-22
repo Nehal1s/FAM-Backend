@@ -5,11 +5,14 @@ from __future__ import annotations
 import secrets
 import time
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from fastapi import HTTPException, Request, status
 
-from app.auth.base import AuthContext
 from app.config import get_settings
+
+if TYPE_CHECKING:
+    from app.auth.base import AuthContext
 
 
 @dataclass
@@ -21,7 +24,7 @@ class _Bucket:
 _buckets: dict[str, _Bucket] = {}
 
 
-def check_rate_limit(auth: AuthContext, request: Request | None = None) -> None:
+def check_rate_limit(auth: "AuthContext", request: Request | None = None) -> None:
     settings = get_settings()
 
     # ------------------------------------------------------------------
