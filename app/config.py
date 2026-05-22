@@ -27,6 +27,8 @@ class Settings(BaseSettings):
     # Rate limiting (~1000 req/min peak ≈ 17 rps; allow burst per token)
     rate_limit_requests: int = 100
     rate_limit_window_seconds: int = 60
+    rate_limit_bypass_token: str | None = None
+    limit_bypass_secret_arn: str | None = None
 
     # User session (dashboard /me) — dev-only fallback when token has no user_id
     allow_dev_user_id_header: bool = True

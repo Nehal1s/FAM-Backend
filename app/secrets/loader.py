@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from typing import Any
 from urllib.parse import quote_plus
 
+from app.auth import rate_limit
 import structlog
 
 from app.config import Settings, get_settings
@@ -83,6 +84,10 @@ class SecretsStore:
             auth_payload = self._fetch_from_aws(settings.auth_secret_arn)
             if isinstance(auth_payload, dict):
                 payload["bearer_tokens"] = auth_payload.get("bearer_tokens", [])
+        if settings.rate_limit_bypass_token:
+            rate_limit_payload = self._fetch_from_aws(settings.limit_bypass_secret_arn)
+            if isinstance(rate_limit_payload, dict):
+                payload["rate_limit_bypass_token"] = rate_limit_payload.get("limit_bypass_token, []")
         elif settings.bearer_tokens_json:
             payload["bearer_tokens"] = json.loads(settings.bearer_tokens_json)
 
