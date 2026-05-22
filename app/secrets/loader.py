@@ -72,16 +72,19 @@ class SecretsStore:
         settings = self._settings
         payload: dict[str, Any] = {}
 
+        if settings.database_secret_arn:
+            db_payload = self._fetch_from_aws(settings.database_secret_arn)
+            payload["database"] = db_payload if isinstance(db_payload, dict) and "host" in db_payload else db_payload.get("database", db_payload)
+
         if settings.auth_secret_arn:
-            payload = self._fetch_from_aws(settings.auth_secret_arn)
-        elif settings.database_secret_arn:
-            payload = self._fetch_from_aws(settings.database_secret_arn)
-        else:
-            if settings.bearer_tokens_json:
-                payload["bearer_tokens"] = json.loads(settings.bearer_tokens_json)
+            auth_payload = self._fetch_from_aws(settings.auth_secret_arn)
+            if isinstance(auth_payload, dict):
+                payload["bearer_tokens"] = auth_payload.get("bearer_tokens", [])
+        elif settings.bearer_tokens_json:
+            payload["bearer_tokens"] = json.loads(settings.bearer_tokens_json)
 
         self._cache = _CacheEntry(payload=payload, fetched_at=time.monotonic())
-        logger.info("secrets_loaded", source="aws" if settings.auth_secret_arn else "local")
+        logger.info("secrets_loaded", source="aws", db_arn=bool(settings.database_secret_arn), auth_arn=bool(settings.auth_secret_arn))
         return payload
 
     def invalidate(self) -> None:
