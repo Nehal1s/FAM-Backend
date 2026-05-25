@@ -33,9 +33,21 @@ class Settings(BaseSettings):
     # User session (dashboard /me) — dev-only fallback when token has no user_id
     allow_dev_user_id_header: bool = True
 
-    # Future: JWT access tokens from login (Google, email/password)
-    jwt_secret: str | None = None
+    # Google OAuth
+    google_client_id: str = ""
+    google_client_secret: str = ""
+    google_redirect_uri: str = "http://localhost:8000/auth/google/callback"
+
+    # JWT
+    jwt_secret: str = ""           # Long random secret, store in Secrets Manager
     jwt_algorithm: str = "HS256"
+    jwt_expire_minutes: int = 60 * 24 * 7   # 7 days
+
+    # Cookie
+    cookie_name: str = "fam_session"
+    cookie_secure: bool = True     # False in dev (no HTTPS)
+    cookie_httponly: bool = True
+    cookie_samesite: str = "lax"
 
     # CloudWatch
     cloudwatch_enabled: bool = False

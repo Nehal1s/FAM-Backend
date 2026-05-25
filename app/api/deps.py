@@ -20,7 +20,8 @@ async def get_correlation_id(
 
 
 async def require_auth_and_rate_limit(
+    request: Request,
     auth: AuthContext = Depends(require_auth),
 ) -> AuthContext:
-    check_rate_limit(auth)
+    check_rate_limit(auth.token_id)
     return auth
