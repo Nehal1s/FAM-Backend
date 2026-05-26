@@ -84,7 +84,7 @@ class SecretsStore:
         if settings.google_secret_arn:
             google_payload = self._fetch_from_aws(settings.google_secret_arn)
             if isinstance(google_payload, dict):
-                payload.update(google_payload)
+                payload.update(google_payload["google_auth_secret"])
 
         if settings.auth_secret_arn:
             auth_payload = self._fetch_from_aws(settings.auth_secret_arn)
