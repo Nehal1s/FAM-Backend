@@ -8,7 +8,9 @@ from dataclasses import dataclass
 from typing import Any
 from urllib.parse import quote_plus
 
-from app.auth import rate_limit
+# from app.auth import rate_limit
+from app.auth.types import BearerTokenEntry 
+
 import structlog
 
 from app.config import Settings, get_settings
@@ -79,17 +81,24 @@ class SecretsStore:
                 payload.update(db_payload)
             elif isinstance(db_payload, dict) and "database" in db_payload:
                 payload.update(db_payload["database"])
+        if settings.google_secret_arn:
+            google_payload = self._fetch_from_aws(settings.google_secret_arn)
+            if isinstance(google_payload, dict):
+                payload.update(google_payload)
 
         if settings.auth_secret_arn:
             auth_payload = self._fetch_from_aws(settings.auth_secret_arn)
             if isinstance(auth_payload, dict):
                 payload["bearer_tokens"] = auth_payload.get("bearer_tokens", [])
+        elif settings.bearer_tokens_json:
+            payload["bearer_tokens"] = json.loads(settings.bearer_tokens_json)
+
         if settings.rate_limit_bypass_token:
             rate_limit_payload = self._fetch_from_aws(settings.limit_bypass_secret_arn)
             if isinstance(rate_limit_payload, dict):
                 payload["rate_limit_bypass_token"] = rate_limit_payload.get("limit_bypass_token, []")
-        elif settings.bearer_tokens_json:
-            payload["bearer_tokens"] = json.loads(settings.bearer_tokens_json)
+
+        
 
         self._cache = _CacheEntry(payload=payload, fetched_at=time.monotonic())
         logger.info("secrets_loaded", source="aws", db_arn=bool(settings.database_secret_arn), auth_arn=bool(settings.auth_secret_arn))

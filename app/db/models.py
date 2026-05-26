@@ -24,6 +24,7 @@ class User(Base):
         nullable=False,
     )
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    hashed_password: Mapped[str | None] = mapped_column(String, nullable=True, default=None)
 
     lawyer_profile: Mapped["Lawyer | None"] = relationship(
         "Lawyer",

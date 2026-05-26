@@ -1,8 +1,10 @@
 import secrets
 
-from app.secrets.loader import BearerTokenEntry, get_secrets_store
+from app.secrets.loader import get_secrets_store
+from app.auth.types import BearerTokenEntry 
 
 _store_cache: list[BearerTokenEntry] | None = None
+
 
 
 def _get_tokens() -> list[BearerTokenEntry]:

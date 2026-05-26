@@ -34,9 +34,10 @@ class Settings(BaseSettings):
     allow_dev_user_id_header: bool = True
 
     # Google OAuth
+    google_secret_arn: str | None = None
     google_client_id: str = ""
     google_client_secret: str = ""
-    google_redirect_uri: str = "http://localhost:8000/auth/google/callback"
+    google_redirect_uri: str = " http://3.108.56.157:8080/auth/google/callback"
 
     # JWT
     jwt_secret: str = ""           # Long random secret, store in Secrets Manager
@@ -53,6 +54,7 @@ class Settings(BaseSettings):
     cloudwatch_enabled: bool = False
     cloudwatch_namespace: str = "FAM/Backend"
     aws_region: str = "us-east-1"
+
 
     @property
     def is_production(self) -> bool:

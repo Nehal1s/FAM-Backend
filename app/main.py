@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 
+from app.auth.jwt import settings
 import structlog
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
@@ -12,8 +13,22 @@ from app.db.engine import dispose_engine, init_engine
 from app.exceptions import DbTimeoutError
 from app.logging.setup import configure_logging
 from app.secrets.loader import get_secrets_store
+from starlette.middleware.sessions import SessionMiddleware
+from app.api.routes.auth import router as auth_router
+from app.config import get_settings
+
+settings = get_settings()
+
 
 logger = structlog.get_logger(__name__)
+# Add session middleware (required for Google OAuth state param)
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=settings.jwt_secret,
+    https_only=settings.cookie_secure,
+)
+
+app.include_router(auth_router)
 
 
 @asynccontextmanager

@@ -12,6 +12,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel
 
 from app.auth.bearer import validate_bearer_token
+from app.auth.type import BearerTokenEntry
 
 bearer_scheme = HTTPBearer(auto_error=False)
 settings = Settings()
@@ -66,7 +67,7 @@ class AuthContext(BaseModel):
 
 async def require_auth(request: Request) -> AuthContext:
     # Try cookie-based JWT first
-    cookie_token = request.cookie.get(settings.cookie_name)
+    cookie_token = request.cookies.get(settings.cookie_name)
     if cookie_token:
         try:
             payload = decode_jwt(cookie_token)
