@@ -6,12 +6,13 @@ from fastapi import APIRouter, HTTPException, Request, status
 from fastapi.responses import JSONResponse
 
 from app.auth.jwt import create_jwt
-from app.config import settings
+from app.config import get_settings
 from app.schemas.auth import AuthResponse, LoginRequest, SignupRequest
 from app.services.auth import get_or_create_google_user, login_with_email, signup_with_email
 
 logger = structlog.get_logger(__name__)
 router = APIRouter(prefix="/auth", tags=["auth"])
+settings = get_settings()
 
 # ── Google OAuth setup ────────────────────────────────────────────────────────
 
