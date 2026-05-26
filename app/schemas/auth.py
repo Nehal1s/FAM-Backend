@@ -25,3 +25,4 @@ class AuthResponse(BaseModel):
     display_name: str | None
     auth_method: str
     message: str
+    session_token: str | None = None

@@ -23,5 +23,5 @@ async def require_auth_and_rate_limit(
     request: Request,
     auth: AuthContext = Depends(require_auth),
 ) -> AuthContext:
-    check_rate_limit(auth.token_id)
+    check_rate_limit(auth, request)
     return auth

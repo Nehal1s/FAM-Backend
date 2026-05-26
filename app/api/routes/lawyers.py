@@ -25,10 +25,12 @@ from app.schemas.lawyer import (
     LawyerResponse,
     LawyerUpdateRequest,
 )
+from app.schemas.service import IndividualServiceType
 from app.services.lawyer import (
     build_lawyer_response,
     get_active_lawyer,
     get_active_lawyer_by_user,
+    get_batch_lawyer_stats,
     touch_lawyer_updated,
 )
 
@@ -120,7 +122,31 @@ async def list_lawyers(
             q = q.where(Lawyer.status == status_filter)
         q = q.order_by(Lawyer.promoted_at.desc()).offset(offset).limit(page_size)
         lawyers = list((await session.execute(q)).scalars().all())
-        return [await build_lawyer_response(session, lw) for lw in lawyers]
+        
+        # Batch load stats instead of N+1 queries
+        lawyer_ids = [lw.id for lw in lawyers]
+        stats_map = await get_batch_lawyer_stats(session, lawyer_ids)
+        
+        return [
+            LawyerResponse(
+                id=lw.id,
+                user_id=lw.user_id,
+                service_type=IndividualServiceType(lw.service_type),
+                status=lw.status,
+                bar_number=lw.bar_number,
+                license_jurisdiction=lw.license_jurisdiction,
+                firm_name=lw.firm_name,
+                specializations=lw.specializations,
+                bio=lw.bio,
+                years_experience=lw.years_experience,
+                average_rating=stats_map[lw.id][0],
+                contract_count=stats_map[lw.id][1],
+                promoted_at=lw.promoted_at,
+                created_at=lw.created_at,
+                updated_at=lw.updated_at,
+            )
+            for lw in lawyers
+        ]
 
     return await _run_query("list_lawyers", _list)
 

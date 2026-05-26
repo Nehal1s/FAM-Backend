@@ -6,6 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.password import hash_password, verify_password
+from app.config import get_settings
 from app.db.models import User
 from app.db.query import query
 from app.exceptions import DbTimeoutError
@@ -29,8 +30,9 @@ async def signup_with_email(
         )
         return result.scalar_one_or_none()
 
+    settings = get_settings()
     try:
-        existing = await query(_find, timeout_ms=300, operation="signup_check_email")
+        existing = await query(_find, timeout_ms=settings.db_query_timeout_ms, operation="signup_check_email")
     except DbTimeoutError:
         raise HTTPException(status_code=status.HTTP_504_GATEWAY_TIMEOUT, detail="Database query timed out")
 
@@ -55,7 +57,7 @@ async def signup_with_email(
         return user
 
     try:
-        user = await query(_create, timeout_ms=300, operation="signup_create_user")
+        user = await query(_create, timeout_ms=settings.db_query_timeout_ms, operation="signup_create_user")
     except DbTimeoutError:
         raise HTTPException(status_code=status.HTTP_504_GATEWAY_TIMEOUT, detail="Database query timed out")
 
@@ -74,8 +76,9 @@ async def login_with_email(email: str, password: str) -> User:
         )
         return result.scalar_one_or_none()
 
+    settings = get_settings()
     try:
-        user = await query(_find, timeout_ms=300, operation="login_find_user")
+        user = await query(_find, timeout_ms=settings.db_query_timeout_ms, operation="login_find_user")
     except DbTimeoutError:
         raise HTTPException(status_code=status.HTTP_504_GATEWAY_TIMEOUT, detail="Database query timed out")
 
@@ -119,8 +122,9 @@ async def get_or_create_google_user(
         )
         return result.scalar_one_or_none()
 
+    settings = get_settings()
     try:
-        user = await query(_find, timeout_ms=300, operation="google_find_user")
+        user = await query(_find, timeout_ms=settings.db_query_timeout_ms, operation="google_find_user")
     except DbTimeoutError:
         raise HTTPException(status_code=status.HTTP_504_GATEWAY_TIMEOUT, detail="Database query timed out")
 
@@ -146,6 +150,6 @@ async def get_or_create_google_user(
         return new_user
 
     try:
-        return await query(_create, timeout_ms=300, operation="google_create_user")
+        return await query(_create, timeout_ms=settings.db_query_timeout_ms, operation="google_create_user")
     except DbTimeoutError:
         raise HTTPException(status_code=status.HTTP_504_GATEWAY_TIMEOUT, detail="Database query timed out")

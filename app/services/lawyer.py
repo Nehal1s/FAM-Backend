@@ -49,6 +49,44 @@ async def get_lawyer_stats(session: AsyncSession, lawyer_id: uuid.UUID) -> tuple
     return (float(avg) if avg is not None else None, int(count or 0))
 
 
+async def get_batch_lawyer_stats(
+    session: AsyncSession, lawyer_ids: list[uuid.UUID]
+) -> dict[uuid.UUID, tuple[float | None, int]]:
+    """Get stats for multiple lawyers in batch (fixes N+1 query problem)."""
+    if not lawyer_ids:
+        return {}
+
+    # Get average ratings for all lawyers in one query
+    ratings_result = await session.execute(
+        select(
+            LawyerContract.lawyer_id,
+            func.avg(LawyerContract.rating).label("avg_rating"),
+        )
+        .where(
+            LawyerContract.lawyer_id.in_(lawyer_ids),
+            LawyerContract.rating.is_not(None),
+        )
+        .group_by(LawyerContract.lawyer_id)
+    )
+    ratings_map = {row[0]: float(row[1]) if row[1] is not None else None for row in ratings_result}
+
+    # Get contract counts for all lawyers in one query
+    counts_result = await session.execute(
+        select(
+            LawyerContract.lawyer_id,
+            func.count(LawyerContract.id).label("contract_count"),
+        )
+        .where(LawyerContract.lawyer_id.in_(lawyer_ids))
+        .group_by(LawyerContract.lawyer_id)
+    )
+    counts_map = {row[0]: int(row[1]) for row in counts_result}
+
+    # Combine results for all lawyer IDs (fill missing with defaults)
+    return {
+        lawyer_id: (ratings_map.get(lawyer_id), counts_map.get(lawyer_id, 0)) for lawyer_id in lawyer_ids
+    }
+
+
 def build_lawyer_artifact(lawyer: Lawyer) -> LawyerArtifact:
     return LawyerArtifact(
         lawyer_id=lawyer.id,

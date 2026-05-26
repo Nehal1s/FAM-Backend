@@ -49,6 +49,8 @@ async def signup(body: SignupRequest):
         display_name=body.display_name,
     )
 
+    session_token = create_jwt(str(user.id))
+    
     response = JSONResponse(
         status_code=status.HTTP_201_CREATED,
         content=AuthResponse(
@@ -57,6 +59,7 @@ async def signup(body: SignupRequest):
             display_name=user.display_name,
             auth_method=user.auth_method,
             message="Account created successfully",
+            session_token=session_token,
         ).model_dump(),
     )
     _set_auth_cookie(response, str(user.id))
@@ -67,6 +70,8 @@ async def signup(body: SignupRequest):
 async def login(body: LoginRequest):
     user = await login_with_email(email=body.email, password=body.password)
 
+    session_token = create_jwt(str(user.id))
+    
     response = JSONResponse(
         content=AuthResponse(
             user_id=str(user.id),
@@ -74,6 +79,7 @@ async def login(body: LoginRequest):
             display_name=user.display_name,
             auth_method=user.auth_method,
             message="Logged in successfully",
+            session_token=session_token,
         ).model_dump()
     )
     _set_auth_cookie(response, str(user.id))
@@ -107,6 +113,8 @@ async def google_callback(request: Request):
         google_sub=user_info["sub"],
     )
 
+    session_token = create_jwt(str(user.id))
+    
     response = JSONResponse(
         content=AuthResponse(
             user_id=str(user.id),
@@ -114,6 +122,7 @@ async def google_callback(request: Request):
             display_name=user.display_name,
             auth_method=user.auth_method,
             message="Logged in with Google successfully",
+            session_token=session_token,
         ).model_dump()
     )
     _set_auth_cookie(response, str(user.id))
