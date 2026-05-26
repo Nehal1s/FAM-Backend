@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta, timezone
 from typing import Literal
 from jose import JWTError, jwt
-from app.config import settings
+from app.config import get_settings
+settings = get_settings()
 
 def create_jwt(user_id: str, token_type: Literal["access"] = "access") -> str:
     expire = datetime.now(timezone.utc) + timedelta(minutes=settings.jwt_expire_minutes)
