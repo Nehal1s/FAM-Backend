@@ -10,6 +10,7 @@ from app.config import get_settings
 from app.db.models import User
 from app.db.query import query
 from app.exceptions import DbTimeoutError
+from fastapi.concurrency import run_in_threadpool
 
 logger = structlog.get_logger(__name__)
 
@@ -44,12 +45,13 @@ async def signup_with_email(
         )
 
     # 2. Create user
+    hashed_password = await run_in_threadpool(hash_password, password)
     async def _create(session: AsyncSession):
         user = User(
             email=email,
             display_name=display_name,
             auth_method="email_password",
-            hashed_password=hash_password(password),
+            hashed_password=hashed_password,
         )
         session.add(user)
         await session.commit()
@@ -101,7 +103,10 @@ async def login_with_email(email: str, password: str) -> User:
             detail=f"This account uses {user.auth_method} login. Please use that method instead.",
         )
 
-    if not verify_password(password, user.hashed_password):
+    is_valid = await run_in_threadpool(
+        verify_password, password, user.hashed_password
+    )
+    if not is_valid:
         logger.warning("login_wrong_password", user_id=str(user.id))
         raise invalid_exc
 

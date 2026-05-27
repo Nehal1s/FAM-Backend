@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     database_secret_arn: str | None = None
     db_pool_size: int = 50
     db_max_overflow: int = 20
-    db_query_timeout_ms: int = 10000
+    db_query_timeout_ms: int = 300
 
     # Auth — combined secret or local override
     auth_secret_arn: str | None = None
