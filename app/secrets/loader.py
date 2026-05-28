@@ -69,6 +69,7 @@ class SecretsStore:
         return json.loads(raw)
 
     def _load_payload(self) -> dict[str, Any]:
+        print('we loafing all the secrets.')
         if not self._should_refresh() and self._cache is not None:
             return self._cache.payload
 
@@ -83,7 +84,6 @@ class SecretsStore:
                 payload.update(db_payload["database"])
         if settings.google_secret_arn:
             google_payload = self._fetch_from_aws(settings.google_secret_arn)
-            print(google_payload)
             if isinstance(google_payload, dict):
                 payload.update(google_payload["google_auth_secret"])
 

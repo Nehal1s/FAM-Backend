@@ -38,6 +38,7 @@ class Settings(BaseSettings):
     google_client_id: str = ""
     google_client_secret: str = ""
     google_redirect_uri: str = " http://3.108.56.157:8080/auth/google/callback"
+    # google_redirect_uri: str = " http://localhost:8080/auth/google/callback"
 
     # JWT
     jwt_secret: str = ""           # Long random secret, store in Secrets Manager

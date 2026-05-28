@@ -13,6 +13,7 @@ from app.services.auth import get_or_create_google_user, login_with_email, signu
 logger = structlog.get_logger(__name__)
 router = APIRouter(prefix="/auth", tags=["auth"])
 settings = get_settings()
+# print(settings.google_client_id)
 
 # ── Google OAuth setup ────────────────────────────────────────────────────────
 
