@@ -4,6 +4,7 @@ import structlog
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
 from starlette.middleware.sessions import SessionMiddleware
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.deps import CORRELATION_HEADER
 from app.api.routes import lawyers, profile, users
@@ -47,6 +48,21 @@ def create_app() -> FastAPI:
         title=settings.app_name,
         lifespan=lifespan,
         redirect_slashes=False,
+    )
+
+    origins = [
+        "http://localhost:8080",
+        "http://localhost:8000",
+        "http://127.0.0.1:8080",
+        "http://127.0.0.1:8000",
+    ]
+
+    application.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,       # List of allowed origins
+        allow_credentials=True,     # Allow cookies and authentication headers
+        allow_methods=["*"],         # Allow all HTTP methods (GET, POST, etc.)
+        allow_headers=["*"],         # Allow all headers
     )
 
     # ── Middleware ─────────────────────────────────────────────────────────────
